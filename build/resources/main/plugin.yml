@@ -1,0 +1,13 @@
+name: TntTag
+version: '2.0'
+main: org.finalbi.tnttag.TntTag
+api-version: '1.19'
+authors: [Finalbi]
+description: a tnt tag plugin for southhollow
+commands:
+  tntstart:
+    description: Starts the tnt Tag mini game
+    usage: /<command>
+  tntstop:
+    description: Stops the tnt Tag mini game
+    usage: /<command>

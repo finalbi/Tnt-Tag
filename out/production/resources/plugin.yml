@@ -1,0 +1,6 @@
+name: Tnt Tag
+version: '${version}'
+main: org.finalbi.tnttag.TntTag
+api-version: '1.19'
+authors: [Finalbi]
+description: a tnt tag plugin for southhollow
