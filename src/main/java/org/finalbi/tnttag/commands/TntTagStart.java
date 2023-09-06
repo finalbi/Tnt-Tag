@@ -27,10 +27,17 @@ public class TntTagStart implements CommandExecutor {
     public static List<Player> players;
     public static int round = 1;
 
+    public static boolean enabledPowerups;
+
 
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (args.length == 0){
+//            if () {
+//
+//            } else if (args[0] == "False")
+        }
         setupPowerUps();
         Random random = new Random();
         players = new ArrayList<>(Bukkit.getOnlinePlayers());
