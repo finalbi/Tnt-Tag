@@ -68,8 +68,15 @@ public class TntTagListener implements Listener {
     ItemStack swap;
     ItemMeta swapMeta;
 
+    ItemStack shield;
+    ItemMeta shieldMeta;
+
+    List<Player> sheilded;
+
 
     public TntTagListener() {
+        List<String> lore = new ArrayList<>();
+        sheilded = new ArrayList<>();
         speedType = PotionEffectType.SPEED;
         invisType = PotionEffectType.INVISIBILITY;
             speed = new PotionEffect(speedType, durationSeconds * 20, amplifier);
@@ -115,10 +122,16 @@ public class TntTagListener implements Listener {
         swap = new ItemStack(Material.BLAZE_ROD);
         swapMeta = swap.getItemMeta();
         swapMeta.setDisplayName("Swap Stick");
-        List<String> lore = new ArrayList<>();
+        lore.clear();
         lore.add("Swaps Places with a Random Player");
         swapMeta.setLore(lore);
         swap.setItemMeta(swapMeta);
+        shield = new ItemStack(Material.AMETHYST_SHARD);
+        shieldMeta = shield.getItemMeta();
+        shieldMeta.setDisplayName("Shield Shard");
+        lore.clear();
+        lore.add("Gives you a shield for 5 seconds");
+        shieldMeta.setLore(lore);
     }
 
     @EventHandler
@@ -143,13 +156,18 @@ public class TntTagListener implements Listener {
                         stick.setItemMeta(stickymeta);
 
                     } else {
-                            if (player == TntTagStart.tntIt) {
+                            if (TntTagStart.tntIt.contains(player)) {
                                 if (player.getInventory().getItemInMainHand().equals(new ItemStack(Material.TNT))) {
                                     if (entity2 instanceof Player) {
                                         Player player2 = (Player) entity2;
-                                        event.setCancelled(true);
-                                        TntTagStart.Tag(player2);
-                                        Bukkit.broadcastMessage(player2.getDisplayName() + " Was Tagged By " + player.getDisplayName());
+                                        if (!sheilded.contains(player2)) {
+                                            event.setCancelled(true);
+                                            TntTagStart.Tag(player, player2);
+
+                                            Bukkit.broadcastMessage(player2.getDisplayName() + " Was Tagged By " + player.getDisplayName());
+                                        }else {
+                                            event.setCancelled(true);
+                                        }
                                     }
                                 }
                             }
@@ -204,6 +222,30 @@ public class TntTagListener implements Listener {
             Location ourLocation = event.getPlayer().getLocation();
             event.getPlayer().teleport(selectedPlayer.getLocation());
             selectedPlayer.teleport(ourLocation);
+        }else if(event.getPlayer().getInventory().getItemInMainHand().getItemMeta().getDisplayName().equals("Shield Shard")){
+            Player player = event.getPlayer();
+            player.getInventory().setHelmet(new ItemStack(Material.DIAMOND_HELMET));
+            player.getInventory().setChestplate(new ItemStack(Material.DIAMOND_CHESTPLATE));
+            player.getInventory().setLeggings(new ItemStack(Material.DIAMOND_LEGGINGS));
+            player.getInventory().setBoots(new ItemStack(Material.DIAMOND_BOOTS));
+            sheilded.add(player);
+            new BukkitRunnable() {
+                int secondsLeft = 5;
+
+                @Override
+                public void run(){
+                    if (secondsLeft <= 0) {
+                        sheilded.remove(player);
+
+                        player.getInventory().removeItem(new ItemStack(Material.DIAMOND_HELMET), new ItemStack(Material.DIAMOND_CHESTPLATE),new ItemStack(Material.DIAMOND_LEGGINGS), new ItemStack(Material.DIAMOND_BOOTS));
+                        player.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
+                        cancel();
+                        return;
+                    }
+                    secondsLeft--;
+                }
+            };
+
         }
     }
     public void powerups(PlayerInteractEvent event){
@@ -236,6 +278,9 @@ public class TntTagListener implements Listener {
                 break;
             case "swap":
                 event.getPlayer().getInventory().addItem(swap);
+                break;
+            case "shield":
+                event.getPlayer().getInventory().addItem(shield);
                 break;
 
         }

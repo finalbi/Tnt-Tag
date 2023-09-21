@@ -25,8 +25,8 @@ import java.util.*;
 public class TntTagStart implements CommandExecutor {
 
     public static boolean hasStarted;
-    public static Player tntIt;
 
+    public static List<Player> tntIt;
     public static List<String> powerups;
     public static List<Player> players;
     public static int round = 1;
@@ -37,6 +37,8 @@ public class TntTagStart implements CommandExecutor {
     public TntTagStart(boolean defaultpowerups){
         this.defaultpowerups = defaultpowerups;
     }
+
+    public static int amountOfIt = 0;
 
 
 
@@ -62,10 +64,7 @@ public class TntTagStart implements CommandExecutor {
         for (Player player: players) {
             player.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
         }
-        int randomNumber = random.nextInt(players.size());
-        tntIt = players.get(randomNumber);
-        Bukkit.broadcastMessage(tntIt.getDisplayName() + " is It");
-        tntIt.getInventory().setItemInMainHand(new ItemStack(Material.TNT));
+
         startTimer("TNT TAG", 60);
         hasStarted = true;
         Bukkit.broadcastMessage("Tnt Tag Round " + round + " Starting");
@@ -81,13 +80,14 @@ public class TntTagStart implements CommandExecutor {
         powerups.add("glowing");
         powerups.add("stick");
         powerups.add("swap");
+        powerups.add("shield");
     }
 
-    public static void Tag(Player player2) {
-        tntIt.getInventory().remove(new ItemStack(Material.TNT));
-        tntIt = player2;
-        tntIt.getInventory().setItemInMainHand(new ItemStack(Material.TNT));
-        Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), "/title " + tntIt.getDisplayName() + " title [\"\",{\"text\":\"YOUR IT\",\"color\":\"red\"}]");
+    public static void Tag(Player tagger,Player tagged) {
+        tagger.getInventory().remove(new ItemStack(Material.TNT));
+        tntIt.add(tagged);
+        tagged.getInventory().setItemInMainHand(new ItemStack(Material.TNT));
+        Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), "/title " + tagged.getDisplayName() + " title [\"\",{\"text\":\"YOUR IT\",\"color\":\"red\"}]");
 
     }
     public void startTimer(String sidebarTitle, int durationSeconds) {
@@ -109,9 +109,13 @@ public class TntTagStart implements CommandExecutor {
             @Override
             public void run() {
                 if (secondsLeft <= 0) {
-                    tntIt.getInventory().remove(new ItemStack(Material.TNT));
-                    tntIt.setHealth(0.0);
-                    players.remove(tntIt);
+                    for (Player player : tntIt) {
+                        player.getInventory().remove(new ItemStack(Material.TNT));
+                        player.setHealth(0.0);
+                        players.remove(player);
+                    }
+                    tntIt.clear();
+
                     for (Player player : Bukkit.getOnlinePlayers()) {
                         removeSidebar(player);
                     }
@@ -151,16 +155,22 @@ public class TntTagStart implements CommandExecutor {
         }
         round++;
         Random random = new Random();
-        int randomNumber = random.nextInt(players.size());
-        tntIt = players.get(randomNumber);
-        Bukkit.broadcastMessage(tntIt.getDisplayName() + " is It");
-        tntIt.getInventory().setItemInMainHand(new ItemStack(Material.TNT));
+        double unRoundItNumber = (16.67 / 100) * players.size();
+        amountOfIt = (int)Math.ceil(unRoundItNumber);
+        for (int i = 0;i <= amountOfIt;i++) {
+            int randomNumber = random.nextInt(players.size());
+            tntIt.add(players.get(randomNumber));
+        }
+        for (Player player : tntIt) {
+            Bukkit.broadcastMessage(player.getDisplayName() + " is It");
+            player.getInventory().setItemInMainHand(new ItemStack(Material.TNT));
+        }
         startTimer("TNT TAG", 60);
         hasStarted = true;
         Bukkit.broadcastMessage("Tnt Tag Round " + round + " Started");
     }
     public void end(){
-        tntIt = null;
+        tntIt.clear();
         hasStarted = false;
         for (Player player : Bukkit.getOnlinePlayers()) {
             removeSidebar(player);
