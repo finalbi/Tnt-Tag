@@ -4,6 +4,7 @@ main: org.finalbi.tnttag.TntTag
 api-version: '1.19'
 authors: [Finalbi]
 description: a tnt tag plugin with powerups
+depend: [ ProtocolLib ]
 commands:
   tntstart:
     description: Starts the tnt Tag mini game

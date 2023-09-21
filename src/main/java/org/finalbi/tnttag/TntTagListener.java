@@ -1,6 +1,7 @@
 package org.finalbi.tnttag;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
@@ -64,6 +65,8 @@ public class TntTagListener implements Listener {
 
     ItemStack socialDistanceStick;
     ItemMeta stickMeta;
+    ItemStack swap;
+    ItemMeta swapMeta;
 
 
     public TntTagListener() {
@@ -109,6 +112,13 @@ public class TntTagListener implements Listener {
         stickMeta.setDisplayName("Social Distancing Stick");
         stickMeta.addEnchant(Enchantment.DURABILITY, 3, true);
         socialDistanceStick.setItemMeta(stickMeta);
+        swap = new ItemStack(Material.BLAZE_ROD);
+        swapMeta = swap.getItemMeta();
+        swapMeta.setDisplayName("Swap Stick");
+        List<String> lore = new ArrayList<>();
+        lore.add("Swaps Places with a Random Player");
+        swapMeta.setLore(lore);
+        swap.setItemMeta(swapMeta);
     }
 
     @EventHandler
@@ -173,7 +183,7 @@ public class TntTagListener implements Listener {
             Bukkit.broadcastMessage("Beacon");
             event.getClickedBlock().setType(Material.DRIED_KELP_BLOCK);
             new BukkitRunnable() {
-                int secondsLeft = 5;
+                int secondsLeft = 10;
                 @Override
                 public void run() {
                     if (secondsLeft <= 0) {
@@ -185,9 +195,17 @@ public class TntTagListener implements Listener {
                 }
             }.runTaskTimer(TntTag.INTANCE, 0L, 20L);
             event.setCancelled(true);
+        }else if(event.getPlayer().getInventory().getItemInMainHand().getItemMeta().getDisplayName().equals("Swap Stick")) {
+            List<Player> players = new ArrayList<>(TntTagStart.players);
+            players.remove(event.getPlayer());
+            Random random = new Random();
+            int randomNumber = random.nextInt(players.size());
+            Player selectedPlayer = players.get(randomNumber);
+            Location ourLocation = event.getPlayer().getLocation();
+            event.getPlayer().teleport(selectedPlayer.getLocation());
+            selectedPlayer.teleport(ourLocation);
         }
     }
-
     public void powerups(PlayerInteractEvent event){
         Random random = new Random();
         int rand = random.nextInt(TntTagStart.powerups.size());
@@ -215,6 +233,9 @@ public class TntTagListener implements Listener {
                 break;
             case "stick":
                 event.getPlayer().getInventory().addItem(socialDistanceStick);
+                break;
+            case "swap":
+                event.getPlayer().getInventory().addItem(swap);
                 break;
 
         }
