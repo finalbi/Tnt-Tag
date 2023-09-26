@@ -98,7 +98,7 @@ public class TntTagStart implements CommandExecutor {
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
         // Add scores to the objective\
-        Score score2 = objective.getScore("Round:");
+           Score score2 = objective.getScore("Round:");
         score2.setScore(round);
         Score score = objective.getScore("Time:");
         score.setScore(durationSeconds);
